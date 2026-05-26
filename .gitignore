@@ -14,8 +14,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+# lib/ and lib64/ are for Python distributions, but NOT for Flutter lib/
+# Flutter's lib/ folder must be committed! Use !frontend_flutter/lib/ exception below
 parts/
 sdist/
 var/
@@ -75,7 +75,9 @@ Thumbs.db
 models/
 checkpoints/
 
-# Node modules (if applicable)
+# Exception: DO NOT ignore Flutter lib and models (contain source code!)
+!frontend_flutter/lib/
+!frontend_flutter/lib/models/
 node_modules/
 npm-debug.log
 yarn-error.log
@@ -98,6 +100,10 @@ chrome_extension/dist/
 frontend_flutter/.dart_tool/
 frontend_flutter/build/
 frontend_flutter/.flutter-plugins
+
+# Exception: DO NOT ignore Flutter source code (lib, screens, services, config, widgets, models)
+!frontend_flutter/lib/
+!frontend_flutter/lib/**
 frontend_flutter/.packages
 frontend_flutter/pubspec.lock
 
