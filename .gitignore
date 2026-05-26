@@ -68,7 +68,6 @@ Thumbs.db
 .env.local
 
 # ML Models & Data
-*.pkl
 *.pickle
 *.h5
 *.pth
