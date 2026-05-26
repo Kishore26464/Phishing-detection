@@ -83,11 +83,13 @@ class MLEngine:
     def load_models(self) -> None:
         errors = []
 
-        # URL model
+        # URL model - use joblib to load (consistent with joblib.dump in training)
         try:
-            with open(URL_MODEL_PATH, "rb") as f:
-                self.url_model = pickle.load(f)
+            self.url_model = joblib.load(URL_MODEL_PATH)
             logger.info(f"URL model loaded from {URL_MODEL_PATH}")
+            # Verify that it's a valid sklearn model
+            if not hasattr(self.url_model, 'predict') or not hasattr(self.url_model, 'predict_proba'):
+                raise TypeError(f"URL model is not a valid sklearn model. Type: {type(self.url_model)}")
         except FileNotFoundError:
             errors.append(f"URL model not found at {URL_MODEL_PATH}")
         except Exception as e:
@@ -95,8 +97,7 @@ class MLEngine:
 
         # URL feature columns
         try:
-            with open(URL_COLS_PATH, "rb") as f:
-                self.url_feature_cols = pickle.load(f)
+            self.url_feature_cols = joblib.load(URL_COLS_PATH)
             logger.info(f"URL feature cols loaded ({len(self.url_feature_cols)} features)")
         except FileNotFoundError:
             # Fall back to the canonical 30-feature list defined at top of file
@@ -109,6 +110,9 @@ class MLEngine:
         try:
             self.sms_model = joblib.load(SMS_MODEL_PATH)
             logger.info(f"SMS model loaded from {SMS_MODEL_PATH}")
+            # Verify it's a valid sklearn model/pipeline
+            if not hasattr(self.sms_model, 'predict') or not hasattr(self.sms_model, 'predict_proba'):
+                raise TypeError(f"SMS model is not a valid sklearn model. Type: {type(self.sms_model)}")
         except FileNotFoundError:
             errors.append(f"SMS model not found at {SMS_MODEL_PATH}")
         except Exception as e:

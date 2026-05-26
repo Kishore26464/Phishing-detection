@@ -129,6 +129,7 @@ async function performScan(tabId, url) {
   try {
     // Step 2: Full API scan
     const apiResult = await scanUrl(url);
+    console.log("[PhishGuard] ✅ API scan SUCCESS:", apiResult);
 
     // Merge prescreen flags with API reasons
     const combinedReasons = [
@@ -146,7 +147,8 @@ async function performScan(tabId, url) {
     };
   } catch (err) {
     // Fallback to client-side only result
-    console.warn("[PhishGuard] API scan failed, using client-side result:", err.message);
+    console.error("[PhishGuard] ❌ API scan FAILED:", err.message, "| URL:", url);
+    console.error("[PhishGuard] Full error:", err);
 
     finalResult = {
       threat_level: prescreen.quickVerdict,

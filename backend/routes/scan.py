@@ -149,26 +149,6 @@ async def scan_url(request: URLScanRequest):
     )
 
 
-# Extend schema to include features field
-from pydantic import BaseModel
-from typing import Optional
-
-class URLScanRequestFull(URLScanRequest):
-    features: Optional[Dict[str, Any]] = {}
-
-# Override the endpoint to use the extended model
-router.routes = [r for r in router.routes if getattr(r, "path", "") != "/scan-url"]
-
-@router.post(
-    "/scan-url",
-    response_model=URLScanResponse,
-    summary="Scan a URL for phishing / malware",
-    tags=["Scanning"],
-)
-async def scan_url_full(request: URLScanRequestFull):
-    return await scan_url(request)
-
-
 # ─── POST /scan-sms ───────────────────────────────────────────────────────────
 
 @router.post(
@@ -229,10 +209,10 @@ async def scan_qr(request: QRScanRequest):
     t0 = time.monotonic()
 
     # Reuse URL scan logic
-    url_request = URLScanRequestFull(url=request.decoded_url, features={})
+    url_request = URLScanRequest(url=request.decoded_url, features={})
 
     try:
-        url_scan_result = await scan_url_full(url_request)
+        url_scan_result = await scan_url(url_request)
     except HTTPException:
         raise
     except Exception as e:

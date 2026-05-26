@@ -103,10 +103,13 @@ def train_models(X, y, feature_cols):
     best_acc = max(rf_acc, xgb_acc)
     print(f"\n[+] Best model: {best_name} ({best_acc*100:.2f}%)")
 
-    joblib.dump(rf, os.path.join(MODEL_DIR, "url_rf_model.pkl"))
-    joblib.dump(xgb, os.path.join(MODEL_DIR, "url_xgb_model.pkl"))
-    joblib.dump(best, os.path.join(MODEL_DIR, "url_best_model.pkl"))
-    joblib.dump(feature_cols, os.path.join(MODEL_DIR, "url_feature_cols.pkl"))
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    
+    # Use joblib consistently for all models to ensure compatibility
+    joblib.dump(rf, os.path.join(MODEL_DIR, "url_rf_model.pkl"), compress=3)
+    joblib.dump(xgb, os.path.join(MODEL_DIR, "url_xgb_model.pkl"), compress=3)
+    joblib.dump(best, os.path.join(MODEL_DIR, "url_best_model.pkl"), compress=3)
+    joblib.dump(feature_cols, os.path.join(MODEL_DIR, "url_feature_cols.pkl"), compress=3)
 
     with open(os.path.join(MODEL_DIR, "url_model_info.txt"), "w") as f:
         f.write(f"Best model: {best_name}\n")
@@ -114,9 +117,14 @@ def train_models(X, y, feature_cols):
         f.write(f"RF Accuracy: {rf_acc*100:.2f}%\n")
         f.write(f"XGB Accuracy: {xgb_acc*100:.2f}%\n")
         f.write(f"Features: {feature_cols}\n")
+        f.write(f"Model type saved: {type(best).__name__}\n")
 
     print("[+] Saved: url_best_model.pkl, url_rf_model.pkl, url_xgb_model.pkl, url_feature_cols.pkl")
 
+    # Verify that best is a proper sklearn model with required methods
+    if not hasattr(best, 'predict') or not hasattr(best, 'predict_proba'):
+        raise ValueError(f"ERROR: Saved model does not have required methods. Type: {type(best)}")
+    
     importances = pd.Series(best.feature_importances_, index=feature_cols)
     top5 = importances.nlargest(5)
     print("\n[*] Top 5 most important features:")
