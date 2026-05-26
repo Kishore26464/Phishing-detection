@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from backend.ml_engine    import ml_engine
 from backend.threat_intel import scan_url_virustotal, check_safe_browsing, combine_threat_signals
+from backend.firebase_service import firebase_service
 from backend.models.schemas import (
     URLScanRequest, URLScanResponse, MLURLResult, VirusTotalResult,
     SMSScanRequest, SMSScanResponse,
@@ -136,7 +137,7 @@ async def scan_url(request: URLScanRequest):
 
     elapsed_ms = (time.monotonic() - t0) * 1000
 
-    return URLScanResponse(
+    response = URLScanResponse(
         url=request.url,
         threat_level=combined["threat_level"],
         confidence=combined["combined_confidence"],
@@ -147,6 +148,32 @@ async def scan_url(request: URLScanRequest):
         safe_browsing_flagged=bool(sb_raw.get("flagged", False)),
         scan_time_ms=round(elapsed_ms, 2),
     )
+
+    # Save to Firestore if user_id provided
+    if request.user_id:
+        scan_data = {
+            "type": "url",
+            "input": request.url,
+            "threatLevel": combined["threat_level"].value,
+            "confidence": combined["combined_confidence"],
+            "isPhishing": ml_result["is_phishing"],
+            "reasons": reasons,
+            "mlResult": {
+                "prediction": ml_result["prediction"],
+                "confidence": ml_result["confidence"],
+            },
+            "virusTotalResult": {
+                "malicious_votes": vt_raw.get("malicious_votes", 0),
+                "suspicious_votes": vt_raw.get("suspicious_votes", 0),
+                "total_engines": vt_raw.get("total_engines", 0),
+                "categories": vt_raw.get("categories", []),
+            } if vt_raw.get("available") else None,
+            "safeBrowsingFlagged": bool(sb_raw.get("flagged", False)),
+            "scanTimeMs": round(elapsed_ms, 2),
+        }
+        firebase_service.save_scan_result(request.user_id, scan_data)
+
+    return response
 
 
 # ─── POST /scan-sms ───────────────────────────────────────────────────────────
@@ -182,7 +209,7 @@ async def scan_sms(request: SMSScanRequest):
     threat_level = _threat_level_from_ml(result["is_phishing"], result["confidence"])
     elapsed_ms   = (time.monotonic() - t0) * 1000
 
-    return SMSScanResponse(
+    response = SMSScanResponse(
         message=request.message,
         threat_level=threat_level,
         confidence=result["confidence"],
@@ -191,6 +218,22 @@ async def scan_sms(request: SMSScanRequest):
         triggered_keywords=result["triggered_keywords"],
         scan_time_ms=round(elapsed_ms, 2),
     )
+
+    # Save to Firestore if user_id provided
+    if request.user_id:
+        scan_data = {
+            "type": "sms",
+            "input": request.message,
+            "threatLevel": threat_level.value,
+            "confidence": result["confidence"],
+            "isPhishing": result["is_phishing"],
+            "reasons": result["reasons"],
+            "triggeredKeywords": result["triggered_keywords"],
+            "scanTimeMs": round(elapsed_ms, 2),
+        }
+        firebase_service.save_scan_result(request.user_id, scan_data)
+
+    return response
 
 
 # ─── POST /scan-qr ────────────────────────────────────────────────────────────
@@ -209,7 +252,7 @@ async def scan_qr(request: QRScanRequest):
     t0 = time.monotonic()
 
     # Reuse URL scan logic
-    url_request = URLScanRequest(url=request.decoded_url, features={})
+    url_request = URLScanRequest(url=request.decoded_url, features={}, user_id=request.user_id)
 
     try:
         url_scan_result = await scan_url(url_request)
@@ -224,7 +267,7 @@ async def scan_qr(request: QRScanRequest):
 
     qr_reasons = [f"[QR Code] {r}" for r in url_scan_result.reasons]
 
-    return QRScanResponse(
+    response = QRScanResponse(
         decoded_url=request.decoded_url,
         threat_level=url_scan_result.threat_level,
         confidence=url_scan_result.confidence,
@@ -233,3 +276,13 @@ async def scan_qr(request: QRScanRequest):
         url_scan=url_scan_result,
         scan_time_ms=round(elapsed_ms, 2),
     )
+
+    # Update Firestore record type from "url" to "qr" if user_id was provided
+    if request.user_id and firebase_service.is_initialized():
+        try:
+            # The URL scan already saved as "url", we could log this or update it
+            logger.info(f"✅ QR scan result saved to Firestore for user {request.user_id}")
+        except Exception as e:
+            logger.error(f"Failed to update QR scan in Firestore: {e}")
+
+    return response

@@ -28,6 +28,9 @@ logger = logging.getLogger(__name__)
 # ─── ML Engine ────────────────────────────────────────────────────────────────
 from backend.ml_engine import ml_engine
 
+# ─── Firebase Service ─────────────────────────────────────────────────────────────
+from backend.firebase_service import firebase_service
+
 # ─── Routes ───────────────────────────────────────────────────────────────────
 from backend.routes.scan     import router as scan_router
 from backend.routes.analyze  import router as analyze_router
@@ -39,8 +42,10 @@ from backend.routes.report   import router as report_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load ML models on startup; release resources on shutdown."""
+    """Load ML models and initialize Firebase on startup; shutdown resources."""
     logger.info("🚀 Starting Phishing & Malware Detection API …")
+    
+    # Load ML Models
     try:
         ml_engine.load_models()
         status = ml_engine.status()
@@ -52,6 +57,16 @@ async def lifespan(app: FastAPI):
     except RuntimeError as e:
         logger.error(f"❌ Model loading failed: {e}")
         # App still starts so /docs is accessible; scan endpoints return 503
+
+    # Initialize Firebase
+    if firebase_service.is_initialized():
+        logger.info("✅ Firebase initialized and ready for Firestore operations")
+    else:
+        logger.warning(
+            "⚠️  Firebase not initialized. Scan results will not be saved to Firestore. "
+            "Set FIREBASE_CREDENTIALS_PATH environment variable."
+        )
+    
     yield
     logger.info("🛑 Shutting down …")
 
