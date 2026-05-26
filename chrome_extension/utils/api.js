@@ -41,8 +41,8 @@ function extractFeatures(rawUrl) {
   // SubDomains — more than 2 dots in hostname (e.g. sub.sub.domain.com)
   const SubDomains = (host.match(/\./g) || []).length > 2 ? 1 : 0;
 
-  // HTTPS — uses HTTPS
-  const HTTPS = isHttps ? 1 : 0;
+  // HTTPS — 1 if NO HTTPS (risky), 0 if HAS HTTPS (safe)
+  const HTTPS = isHttps ? 0 : 1;
 
   // DomainRegLen — domain appears newly registered (heuristic: short numeric or random hostname)
   const DomainRegLen = /[0-9]{4,}/.test(host) || host.replace(/[^a-z]/g,"").length < 4 ? 1 : 0;
