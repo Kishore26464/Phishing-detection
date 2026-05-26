@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhishGuard AI</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 6V12C4 16.4 7.4 20.5 12 22C16.6 20.5 20 16.4 20 12V6L12 2Z"
+              fill="none" stroke="#00B4D8" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M9 12L11 14L15 10" stroke="#00E676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">PhishGuard <span class="ai-badge">AI</span></div>
+      <div class="logo-sub">Real-time threat detection</div>
+    </div>
+  </div>
+  <button class="settings-btn" id="settingsToggle" title="Settings">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </button>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN PANEL
+════════════════════════════════════════════════════════════ -->
+<main id="mainPanel">
+
+  <!-- Current URL display -->
+  <div class="url-card">
+    <div class="url-label">SCANNING</div>
+    <div class="url-text" id="currentUrl">Loading current tab…</div>
+  </div>
+
+  <!-- Scan result card -->
+  <div class="result-card" id="resultCard">
+
+    <!-- Loading state -->
+    <div id="loadingState" class="state-block">
+      <div class="pulse-ring"></div>
+      <div class="loading-text">Analyzing threat vectors…</div>
+      <div class="loading-sub">Checking AI models + VirusTotal</div>
+    </div>
+
+    <!-- Result state (hidden until scan complete) -->
+    <div id="resultState" class="state-block hidden">
+      <div class="verdict-row">
+        <div class="verdict-icon" id="verdictIcon">●</div>
+        <div>
+          <div class="verdict-label" id="verdictLabel">SAFE</div>
+          <div class="verdict-sub" id="verdictSub">No threats detected</div>
+        </div>
+        <div class="confidence-ring-wrap">
+          <svg class="conf-ring" viewBox="0 0 44 44">
+            <circle class="conf-bg" cx="22" cy="22" r="18" />
+            <circle class="conf-fill" id="confCircle" cx="22" cy="22" r="18"
+                    stroke-dasharray="113" stroke-dashoffset="113"/>
+          </svg>
+          <div class="conf-text" id="confText">--%</div>
+        </div>
+      </div>
+
+      <!-- Threat metrics row -->
+      <div class="metrics-row">
+        <div class="metric-item">
+          <div class="metric-icon">🔒</div>
+          <div class="metric-label">HTTPS</div>
+          <div class="metric-val" id="metricsHttps">—</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-icon">🛡️</div>
+          <div class="metric-label">VirusTotal</div>
+          <div class="metric-val" id="metricsVt">—</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-icon">🤖</div>
+          <div class="metric-label">AI Score</div>
+          <div class="metric-val" id="metricsAi">—</div>
+        </div>
+      </div>
+
+      <!-- Reasons / flags -->
+      <div class="reasons-section" id="reasonsSection" style="display:none">
+        <div class="section-title">⚑ THREAT INDICATORS</div>
+        <ul class="reasons-list" id="reasonsList"></ul>
+      </div>
+
+      <!-- Client-side note -->
+      <div class="client-note hidden" id="clientNote">
+        ⚡ Client-side analysis only (API unavailable)
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="errorState" class="state-block hidden">
+      <div class="error-icon">⚠</div>
+      <div class="error-msg" id="errorMsg">Scan failed</div>
+      <div class="error-sub">Check your internet connection or backend URL</div>
+    </div>
+
+  </div>
+
+  <!-- Action buttons -->
+  <div class="action-row">
+    <button class="btn btn-primary" id="scanNowBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      Scan Now
+    </button>
+    <button class="btn btn-danger" id="reportBtn" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      Report Threat
+    </button>
+  </div>
+
+  <!-- History section -->
+  <div class="history-section">
+    <div class="section-title-row">
+      <span class="section-title">🕐 RECENT SCANS</span>
+      <button class="clear-btn" id="clearHistoryBtn">Clear</button>
+    </div>
+    <div id="historyList" class="history-list">
+      <div class="history-empty">No scans yet — browse to get started</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SETTINGS PANEL
+════════════════════════════════════════════════════════════ -->
+<div id="settingsPanel" class="settings-panel hidden">
+  <div class="settings-title">Settings</div>
+
+  <div class="setting-item">
+    <div>
+      <div class="setting-label">Auto-scan on page load</div>
+      <div class="setting-desc">Automatically scan every URL you visit</div>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="setAutoScan" checked />
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+
+  <div class="setting-item">
+    <div>
+      <div class="setting-label">Desktop notifications</div>
+      <div class="setting-desc">Show alert when dangerous site detected</div>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="setNotifications" checked />
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+
+  <div class="setting-item">
+    <div>
+      <div class="setting-label">Page warning banner</div>
+      <div class="setting-desc">Inject red warning on dangerous pages</div>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="setPageBanner" checked />
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+
+  <div class="backend-url-wrap">
+    <div class="setting-label">Backend URL</div>
+    <input type="text" id="backendUrlInput" class="backend-input"
+           placeholder="https://your-app.onrender.com" />
+    <button class="btn btn-primary btn-sm" id="saveBackendBtn">Save</button>
+  </div>
+
+  <div class="settings-version">PhishGuard AI v1.0.0 — Final Year Project</div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
