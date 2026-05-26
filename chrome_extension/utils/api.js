@@ -2,7 +2,7 @@
 // utils/api.js — PhishGuard AI Backend API Client
 // ============================================================
 
-const BACKEND_URL = "https://rohanv56-phishing-detection-api.hf.space/api/v1";
+const BACKEND_URL = "https://rohanv56-phishing-api.hf.space/api/v1";
 const API_TIMEOUT_MS = 20000;
 
 /**

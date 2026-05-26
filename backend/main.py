@@ -112,7 +112,7 @@ app.include_router(report_router,  prefix="/api/v1")
 
 # ─── Root & Health ────────────────────────────────────────────────────────────
 
-PUBLIC_API_URL = os.getenv("PUBLIC_API_URL", "https://rohanv56-phishing-detection-api.hf.space")
+PUBLIC_API_URL = os.getenv("PUBLIC_API_URL", "https://rohanv56-phishing-api.hf.space")
 
 @app.get("/", tags=["Root"])
 async def root():
