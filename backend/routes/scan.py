@@ -29,11 +29,19 @@ logger = logging.getLogger(__name__)
 # ─── Helper: map combined risk to ThreatLevel ─────────────────────────────────
 
 def _threat_level_from_ml(is_phishing: bool, confidence: float) -> ThreatLevel:
+    """Map ML prediction + confidence to threat level.
+    
+    Thresholds adjusted for both URL and SMS models:
+    - DANGEROUS: is_phishing=True AND confidence >= 0.80 (very confident)
+    - SUSPICIOUS: is_phishing=True AND confidence >= 0.65 (moderately confident)
+    - SAFE: is_phishing=False (legitimate)
+    - UNKNOWN: edge cases or inconclusive predictions
+    """
     if not is_phishing:
         return ThreatLevel.SAFE
-    if confidence >= 0.75:
+    if confidence >= 0.80:
         return ThreatLevel.DANGEROUS
-    if confidence >= 0.50:
+    if confidence >= 0.65:
         return ThreatLevel.SUSPICIOUS
     return ThreatLevel.UNKNOWN
 
