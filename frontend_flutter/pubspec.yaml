@@ -1,0 +1,53 @@
+name: frontend_flutter
+description: PhishGuard - AI-Powered Phishing & Malware Detection System
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP & Networking
+  http: ^1.2.1
+
+  # Firebase
+  firebase_core: ^3.3.0
+  firebase_auth: ^5.1.4
+  cloud_firestore: ^5.2.1
+  firebase_messaging: ^15.0.4
+  google_sign_in: ^6.2.1
+
+  # QR Scanner
+  mobile_scanner: ^5.2.3
+
+  # Charts
+  fl_chart: ^0.68.0
+
+  # State Management
+  provider: ^6.1.2
+
+  # Local Storage
+  shared_preferences: ^2.3.1
+
+  # Notifications
+  flutter_local_notifications: ^17.2.2
+
+  # Animations
+  lottie: ^3.1.2
+
+  # Icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/animations/
+    - assets/images/

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "934404827979",
+    "project_id": "phishguard-38c10",
+    "storage_bucket": "phishguard-38c10.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:934404827979:android:8c92050942c5c85ac3d6ce",
+        "android_client_info": {
+          "package_name": "com.phishguard.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "934404827979-n1tkd7upiab4ko27k1t0bda9uagf355o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.phishguard.app",
+            "certificate_hash": "c0a78a33ab7ac9e0acb00a9f5a3aaa9fe4d08268"
+          }
+        },
+        {
+          "client_id": "934404827979-2b9rvbds3qr6s2lugr4r2jlmlaeuh5e9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpQHEWHzHZMC-JDakrdBi1lweMTS5bY7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "934404827979-2b9rvbds3qr6s2lugr4r2jlmlaeuh5e9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
