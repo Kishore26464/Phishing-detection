@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen>
           isLoggedIn = user != null;
           debugPrint('Auth check complete - logged in: $isLoggedIn');
         } catch (authError) {
-          debugPrint('❌ FirebaseAuth access failed: $authError');
+          debugPrint(' FirebaseAuth access failed: $authError');
           isLoggedIn = false;
         }
       } else {
@@ -69,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
         isLoggedIn = false;
       }
     } catch (e) {
-      debugPrint('❌ Auth check exception: $e');
+      debugPrint(' Auth check exception: $e');
       isLoggedIn = false;
     }
 

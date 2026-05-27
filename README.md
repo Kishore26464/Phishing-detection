@@ -2,20 +2,20 @@
 
 ![Project Status](https://img.shields.io/badge/status-complete-brightgreen) ![Python](https://img.shields.io/badge/Python-3.11-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.111-brightgreen) ![Flutter](https://img.shields.io/badge/Flutter-3.0+-blue)
 
-## 📋 Project Overview
+##  Project Overview
 
 PhishGuard is a comprehensive AI-powered security solution for detecting phishing URLs, malware, and threat-level analysis across multiple platforms.
 
 **Architecture:**
-- 🔙 **Backend:** FastAPI + ML (Random Forest, XGBoost, TF-IDF)
-- 📱 **Mobile:** Flutter (Android/iOS)
-- 🔗 **Chrome Extension:** Real-time URL scanning
-- ⚡ **APIs:** VirusTotal, Google Safe Browsing, Firebase Firestore
-- 🚀 **Deployment:** Render, HuggingFace Spaces
+-  **Backend:** FastAPI + ML (Random Forest, XGBoost, TF-IDF)
+-  **Mobile:** Flutter (Android/iOS)
+-  **Chrome Extension:** Real-time URL scanning
+-  **APIs:** VirusTotal, Google Safe Browsing, Firebase Firestore
+-  **Deployment:** Render, HuggingFace Spaces
 
 ---
 
-## 🎯 Key Features
+##  Key Features
 
 ### URL Scanning
 - **ML-based detection:** Random Forest (97.11% accuracy) + XGBoost (96.79%)
@@ -29,16 +29,16 @@ PhishGuard is a comprehensive AI-powered security solution for detecting phishin
 - **Language analysis:** Legitimate vs. suspicious messaging patterns
 
 ### Mobile App (Flutter)
-- 📲 Live URL scanning with camera QR code reading
-- 🔐 Device security scanning (APK permission analysis)
-- 📊 Threat history & detailed reports
-- 🔄 Real-time Firebase sync
+-  Live URL scanning with camera QR code reading
+-  Device security scanning (APK permission analysis)
+-  Threat history & detailed reports
+-  Real-time Firebase sync
 
 ### Chrome Extension
-- 🌐 Automatic URL scanning on every page load
-- ⚡ Instant visual feedback (safe/risky badge)
-- 📋 Scan history
-- 🎯 One-click manual scan
+-  Automatic URL scanning on every page load
+-  Instant visual feedback (safe/risky badge)
+-  Scan history
+-  One-click manual scan
 
 ---
 
@@ -52,7 +52,7 @@ PhishGuard is a comprehensive AI-powered security solution for detecting phishin
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Python 3.11+
@@ -78,7 +78,7 @@ pip install -r backend/requirements.txt
 # Create .env file (see API_KEYS_SETUP.md)
 echo "VIRUSTOTAL_API_KEY=your_key" > backend/.env
 echo "GOOGLE_SAFE_BROWSING_KEY=your_key" >> backend/.env
-echo "FIREBASE_CREDENTIALS_PATH=backend/phishguard-38c10-firebase-adminsdk-fbsvc-a3ca72c671.json" >> backend/.env
+echo "FIREBASE_CREDENTIALS_PATH=backend/phishguard-***" >> backend/.env
 
 # Start local server
 uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
@@ -92,7 +92,7 @@ python backend/test_api.py
 
 ### 4. Deploy to Render (see DEPLOYMENT_GUIDE.md)
 
-### 5. Build Flutter APK (see FLUTTER_BUILD_GUIDE.md)
+### 5. Build Flutter APK
 
 ---
 
@@ -161,7 +161,7 @@ phishing-detection/
 
 ---
 
-## 🔌 API Endpoints
+##  API Endpoints
 
 ### URL Scanning
 ```
@@ -226,12 +226,12 @@ See [API_DOCS.md](API_DOCS.md) for complete documentation with examples.
 
 ## 🔐 Security Considerations
 
-✅ **API Keys securely stored** in environment variables (never committed to Git)
-✅ **Firebase credentials** in `.gitignore` — not exposed
-✅ **CORS enabled** for Flutter mobile & extension only
-✅ **HTTPS enforcement** for external APIs
-✅ **Rate limiting** ready (via Render middleware)
-✅ **Input validation** on all endpoints (Pydantic schemas)
+ **API Keys securely stored** in environment variables (never committed to Git)
+ **Firebase credentials** in `.gitignore` — not exposed
+ **CORS enabled** for Flutter mobile & extension only
+ **HTTPS enforcement** for external APIs
+ **Rate limiting** ready (via Render middleware)
+ **Input validation** on all endpoints (Pydantic schemas)
 
 ---
 
@@ -246,7 +246,7 @@ See [API_DOCS.md](API_DOCS.md) for complete documentation with examples.
 
 ---
 
-## 📦 Deployment Status
+## Deployment Status
 
 | Component | Status | URL |
 |-----------|--------|-----|
@@ -257,7 +257,7 @@ See [API_DOCS.md](API_DOCS.md) for complete documentation with examples.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 Run the comprehensive test suite:
 
@@ -266,13 +266,13 @@ python backend/test_api.py
 ```
 
 **Tests Included:**
-- ✅ Health check
-- ✅ Phishing URL detection
-- ✅ Legitimate URL classification
-- ✅ Phishing SMS detection
-- ✅ Legitimate SMS classification
-- ✅ Threat history retrieval
-- ✅ APK permission analysis
+-  Health check
+-  Phishing URL detection
+-  Legitimate URL classification
+-  Phishing SMS detection
+-  Legitimate SMS classification
+-  Threat history retrieval
+-  APK permission analysis
 
 ---
 
@@ -286,7 +286,7 @@ python backend/test_api.py
 
 ---
 
-## 👨‍💻 Development
+##  Development
 
 ### Local Backend Development
 ```bash
@@ -318,7 +318,7 @@ python ml_models/train_sms_classifier.py
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork repository
 2. Create feature branch: `git checkout -b feature/amazing-feature`
@@ -334,15 +334,14 @@ This project is licensed under the **Apache License 2.0**. See `LICENSE` file fo
 
 ---
 
-## 📞 Support
+##  Support
 
 - 🐛 Found a bug? Open an issue on GitHub
 - 💡 Have a feature request? Discuss in Discussions
-- 📧 Contact: kishore@example.com
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 ### Mobile App
 - **Home Screen:** URL/SMS input, quick scan button
@@ -362,7 +361,7 @@ This project is licensed under the **Apache License 2.0**. See `LICENSE` file fo
 
 ---
 
-## 🏆 Project Status
+##  Project Status
 
 **Phase 1-2:** ✅ ML Models (97%+ accuracy)
 **Phase 3:** ✅ FastAPI Backend (Complete)
@@ -376,4 +375,3 @@ This project is licensed under the **Apache License 2.0**. See `LICENSE` file fo
 
 **Built with ❤️ for cybersecurity**
 
-Last Updated: May 2026
