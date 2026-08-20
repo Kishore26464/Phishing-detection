@@ -117,19 +117,29 @@ class FirebaseService:
 
     def save_report(
         self,
-        user_id: str,
-        url: str,
-        description: str,
-        details: Optional[str] = None,
+        report_id: str,
+        scan_type: str,
+        input_data: str,
+        threat_level: str,
+        user_id: Optional[str] = None,
+        user_comment: Optional[str] = None,
+        reporter_email: Optional[str] = None,
     ) -> bool:
         """
-        Save a threat report to Firestore.
+        Save a user-submitted threat report to Firestore under reports/{report_id}.
+
+        Using the caller-generated report_id as the document id (rather than
+        an auto-id) keeps the id returned to the client meaningful for any
+        future lookup, and makes this call idempotent on retry.
 
         Args:
-            user_id: Firebase User ID
-            url: URL being reported
-            description: Short description of the threat
-            details: Additional context
+            report_id: Caller-generated unique id for this report
+            scan_type: 'url' | 'sms' | 'qr' | 'app'
+            input_data: The reported URL / SMS text / decoded QR payload
+            threat_level: 'safe' | 'suspicious' | 'dangerous' | 'unknown'
+            user_id: Firebase UID of the reporting user, if signed in
+            user_comment: Optional free-text context from the reporter
+            reporter_email: Optional email for follow-up
 
         Returns:
             True if saved successfully, False otherwise
@@ -140,22 +150,65 @@ class FirebaseService:
 
         try:
             report_data = {
+                "reportId": report_id,
                 "userId": user_id,
-                "url": url,
-                "description": description,
-                "details": details or "",
+                "scanType": scan_type,
+                "inputData": input_data,
+                "threatLevel": threat_level,
+                "userComment": user_comment,
+                "reporterEmail": reporter_email,
                 "status": "pending",
                 "timestamp": datetime.utcnow(),
                 "createdAt": datetime.utcnow(),
             }
 
-            self.db.collection("reports").add(report_data)
-            logger.info(f"✅ Report saved to Firestore")
+            self.db.collection("reports").document(report_id).set(report_data)
+            logger.info(f"✅ Report saved to Firestore: {report_id}")
             return True
 
         except Exception as e:
             logger.error(f"❌ Failed to save report: {e}")
             return False
+
+    def get_user_reports(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        Get reports submitted by a specific user, newest first.
+
+        Sorts in Python rather than via Firestore `order_by` so this doesn't
+        require a composite index on (userId, timestamp) to be created in
+        the Firestore console first.
+
+        Args:
+            user_id: Firebase User ID
+            limit: Maximum number of reports to return
+
+        Returns:
+            List of report documents, newest first
+        """
+        if not self.is_initialized():
+            logger.warning("⚠️  Firebase not initialized - returning empty report list")
+            return []
+
+        try:
+            docs = (
+                self.db.collection("reports")
+                .where("userId", "==", user_id)
+                .limit(max(limit * 4, limit))
+                .stream()
+            )
+
+            reports = []
+            for doc in docs:
+                r = doc.to_dict()
+                r["id"] = doc.id
+                reports.append(r)
+
+            reports.sort(key=lambda r: r.get("timestamp") or datetime.min, reverse=True)
+            return reports[:limit]
+
+        except Exception as e:
+            logger.error(f"❌ Failed to get user reports: {e}")
+            return []
 
     def get_user_stats(self, user_id: str) -> Dict[str, int]:
         """

@@ -5,6 +5,7 @@ import type {
   ReportThreatRequest,
   ReportThreatResponse,
   SMSScanResponse,
+  ThreatHistoryResponse,
   URLScanResponse,
 } from './types';
 
@@ -59,6 +60,12 @@ export function analyzeApp(appName: string, permissions: string[]) {
 
 export function reportThreat(payload: ReportThreatRequest) {
   return request<ReportThreatResponse>('/report-threat', payload);
+}
+
+/** User-submitted reports persisted to Firestore (see POST /report-threat). */
+export function getReportHistory(userId: string, page = 1, pageSize = 20) {
+  const params = new URLSearchParams({ user_id: userId, page: String(page), page_size: String(pageSize) });
+  return request<ThreatHistoryResponse>(`/threat-history?${params.toString()}`, undefined, 'GET');
 }
 
 export async function checkHealth(): Promise<boolean> {

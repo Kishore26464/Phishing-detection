@@ -28,7 +28,7 @@ export function Login() {
           'radial-gradient(circle at 50% 0%, rgba(123,110,246,0.18), transparent 60%), radial-gradient(circle at 20% 90%, rgba(77,224,130,0.08), transparent 55%)',
       }} />
 
-      <main className="ink-card relative z-10 flex w-full max-w-md flex-col items-center p-12 shadow-2xl">
+      <main className="ink-card relative z-10 flex w-full max-w-[28rem] flex-col items-center p-12 shadow-2xl">
         <div className="pulse-line absolute left-0 top-0" />
 
         <div className="mb-8 flex flex-col items-center text-center">
@@ -41,7 +41,7 @@ export function Login() {
             </div>
           </div>
           <h2 className="text-headline-md mb-4 text-on-surface">Signal Forensics for the Modern Web.</h2>
-          <p className="text-body-md max-w-xs text-on-surface-variant">
+          <p className="text-body-md max-w-[20rem] text-on-surface-variant">
             Detect phishing, malware, and credential theft with real-time signal analysis.
           </p>
         </div>

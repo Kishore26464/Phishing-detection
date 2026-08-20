@@ -78,6 +78,14 @@ checkpoints/
 # Exception: DO NOT ignore Flutter lib and models (contain source code!)
 !frontend_flutter/lib/
 !frontend_flutter/lib/models/
+
+# Exception: DO NOT ignore the FastAPI backend's models package — it holds
+# the Pydantic request/response schemas (backend/models/schemas.py), not ML
+# checkpoints. Without this, `models/` above silently excludes it and the
+# backend fails to import on a fresh clone.
+!backend/models/
+!backend/models/**
+backend/models/__pycache__/
 node_modules/
 npm-debug.log
 yarn-error.log

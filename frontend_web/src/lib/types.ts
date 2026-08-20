@@ -72,12 +72,31 @@ export interface ReportThreatRequest {
   threat_level: ThreatLevel;
   user_comment?: string;
   reporter_email?: string;
+  user_id?: string;
 }
 
 export interface ReportThreatResponse {
   report_id: string;
   status: string;
   message: string;
+  persisted: boolean;
+}
+
+export interface ThreatHistoryEntry {
+  id: string;
+  scan_type: ScanType;
+  input_data: string;
+  threat_level: ThreatLevel;
+  confidence: number;
+  timestamp: string;
+  reasons: string[];
+}
+
+export interface ThreatHistoryResponse {
+  entries: ThreatHistoryEntry[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 /** Normalized shape used to render the Result Detail forensics view,

@@ -1,9 +1,11 @@
-import { useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Layout } from '../components/Layout';
 import { PulseCard } from '../components/PulseCard';
+import { ThreatBadge } from '../components/ThreatBadge';
 import { useAuth } from '../context/AuthContext';
-import { reportThreat } from '../lib/api';
-import type { ScanType, ThreatLevel } from '../lib/types';
+import { getReportHistory, reportThreat } from '../lib/api';
+import type { ScanType, ThreatHistoryEntry, ThreatLevel } from '../lib/types';
+import { formatDateTime, truncate } from '../lib/format';
 
 export function Report() {
   const { user } = useAuth();
@@ -13,6 +15,27 @@ export function Report() {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const [reports, setReports] = useState<ThreatHistoryEntry[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(true);
+
+  const loadReports = useCallback(async () => {
+    if (!user) {
+      setReportsLoading(false);
+      return;
+    }
+    setReportsLoading(true);
+    try {
+      const res = await getReportHistory(user.uid);
+      setReports(res.entries);
+    } finally {
+      setReportsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -26,10 +49,12 @@ export function Report() {
         threat_level: threatLevel,
         user_comment: comment.trim() || undefined,
         reporter_email: user?.email ?? undefined,
+        user_id: user?.uid,
       });
-      setStatus({ ok: true, message: res.message });
+      setStatus({ ok: res.persisted, message: res.message });
       setInput('');
       setComment('');
+      if (res.persisted) loadReports();
     } catch (err) {
       setStatus({ ok: false, message: err instanceof Error ? err.message : 'Failed to submit report' });
     } finally {
@@ -46,7 +71,8 @@ export function Report() {
         </p>
       </div>
 
-      <PulseCard pulseColor="tertiary" className="max-w-2xl p-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <PulseCard pulseColor="tertiary" className="p-6">
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
             <label className="mb-1 block text-label-sm uppercase tracking-widest text-on-surface-variant">
@@ -122,6 +148,46 @@ export function Report() {
           <p className="text-center font-mono text-label-sm text-outline">Data is transmitted over TLS.</p>
         </form>
       </PulseCard>
+
+      <PulseCard pulseColor="muted" className="flex flex-col p-6">
+        <div className="mb-4 flex items-center justify-between border-b border-outline-variant/30 pb-3">
+          <h3 className="text-headline-md text-on-surface">Your Reports</h3>
+          <button
+            onClick={loadReports}
+            disabled={reportsLoading}
+            className="flex items-center gap-1 text-label-sm text-on-surface-variant transition-colors hover:text-primary disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[16px]">refresh</span>
+            Refresh
+          </button>
+        </div>
+
+        {reportsLoading && reports.length === 0 && (
+          <p className="text-body-md text-on-surface-variant">Loading your reports…</p>
+        )}
+        {!reportsLoading && reports.length === 0 && (
+          <p className="text-body-md text-on-surface-variant">
+            Nothing reported yet. Submitted reports are saved to Firestore and will show up here — even
+            across sessions.
+          </p>
+        )}
+
+        <ul className="flex flex-col gap-3 overflow-y-auto">
+          {reports.map((r) => (
+            <li key={r.id} className="rounded border border-outline-variant/30 bg-surface-dim p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <ThreatBadge level={r.threat_level} />
+                <span className="font-mono text-label-sm text-on-surface-variant">{formatDateTime(r.timestamp ? Date.parse(r.timestamp) : null)}</span>
+              </div>
+              <p className="break-all font-mono text-data-mono text-on-surface" title={r.input_data}>
+                {truncate(r.input_data, 60)}
+              </p>
+              <p className="mt-1 text-label-sm uppercase tracking-widest text-on-surface-variant">{r.scan_type}</p>
+            </li>
+          ))}
+        </ul>
+      </PulseCard>
+      </div>
     </Layout>
   );
 }

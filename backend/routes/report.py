@@ -14,6 +14,7 @@ from backend.models.schemas import (
     ThreatHistoryEntry,
 )
 from backend.store import threat_store
+from backend.firebase_service import firebase_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -71,10 +72,34 @@ async def report_threat(request: ReportThreatRequest):
     )
 
     threat_store.add(entry)
-    logger.info(f"Threat report saved: {report_id} | {request.scan_type} | {request.threat_level}")
+
+    # Persist to Firestore so the report survives backend restarts. The
+    # in-memory threat_store above is kept as a same-session fallback for
+    # local dev without Firebase credentials configured.
+    persisted = firebase_service.save_report(
+        report_id=report_id,
+        scan_type=request.scan_type,
+        input_data=request.input_data.strip(),
+        threat_level=request.threat_level.value,
+        user_id=request.user_id,
+        user_comment=request.user_comment,
+        reporter_email=request.reporter_email,
+    )
+
+    logger.info(
+        f"Threat report saved: {report_id} | {request.scan_type} | "
+        f"{request.threat_level} | persisted={persisted}"
+    )
+
+    message = (
+        f"Threat report saved with ID {report_id}"
+        if persisted
+        else f"Threat report accepted with ID {report_id}, but Firestore is unavailable — it will not survive a backend restart"
+    )
 
     return ReportThreatResponse(
         report_id=report_id,
         status="accepted",
-        message=f"Threat report accepted and stored with ID {report_id}",
+        message=message,
+        persisted=persisted,
     )
