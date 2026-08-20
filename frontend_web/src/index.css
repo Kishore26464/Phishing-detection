@@ -1,0 +1,255 @@
+@import "tailwindcss";
+
+@theme {
+  /* ─── Signal Forensics color system ───────────────────────────────── */
+  --color-void: #0a0c11;
+  --color-ink: #12151d;
+  --color-steel: #1d212c;
+
+  --color-background: #0a0c11;
+  --color-on-background: #dfe2f1;
+
+  --color-surface: #0a0c11;
+  --color-surface-dim: #0a0c11;
+  --color-surface-bright: #353945;
+  --color-surface-container-lowest: #06070b;
+  --color-surface-container-low: #0f1218;
+  --color-surface-container: #12151d;
+  --color-surface-container-high: #1a1e28;
+  --color-surface-container-highest: #232733;
+  --color-surface-variant: #1d212c;
+
+  --color-on-surface: #dfe2f1;
+  --color-on-surface-variant: #9a98a8;
+
+  --color-outline: #52505f;
+  --color-outline-variant: #1d212c;
+
+  --color-primary: #a599ff;
+  --color-primary-fixed: #7b6ef6;
+  --color-on-primary: #150066;
+  --color-primary-container: #372f80;
+  --color-on-primary-container: #e4dfff;
+
+  --color-secondary: #4de082;
+  --color-clear: #4ade80;
+  --color-on-secondary: #00210c;
+  --color-secondary-container: #0d3d21;
+  --color-on-secondary-container: #6dfe9c;
+
+  --color-tertiary: #e8a33d;
+  --color-static: #e8a33d;
+  --color-on-tertiary: #2a1800;
+  --color-tertiary-container: #4a3210;
+  --color-on-tertiary-container: #ffddb5;
+
+  --color-error: #ff5c72;
+  --color-breach: #ff5c72;
+  --color-on-error: #2a0006;
+  --color-error-container: #4d0a14;
+  --color-on-error-container: #ffdad6;
+
+  /* ─── Spacing rhythm (4px baseline) ───────────────────────────────── */
+  --spacing-base: 4px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 48px;
+  --spacing-gutter: 20px;
+  --spacing-margin-mobile: 16px;
+  --spacing-margin-desktop: 32px;
+
+  /* ─── Shape ────────────────────────────────────────────────────────── */
+  --radius-sm: 0.25rem;
+  --radius-DEFAULT: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-outline-variant);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-on-background);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--color-primary-fixed);
+    color: var(--color-void);
+  }
+
+  /* Slim, technical scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface-container-lowest);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-steel);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-outline);
+  }
+}
+
+@layer components {
+  /* ─── Typography scale (Signal Forensics) ─────────────────────────── */
+  .text-display-lg {
+    font-family: var(--font-mono);
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .text-headline-lg {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .text-headline-lg-mobile {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .text-headline-md {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .text-body-lg {
+    font-family: var(--font-sans);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  .text-body-md {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  .text-label-md {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0.05em;
+  }
+  .text-label-sm {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.08em;
+  }
+  .text-data-mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  /* ─── The Pulse — signature waveform accent ───────────────────────── */
+  .pulse-line {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, var(--color-primary-fixed), transparent);
+    animation: sf-pulse 2.2s ease-in-out infinite;
+    opacity: 0.7;
+  }
+
+  .ink-card {
+    position: relative;
+    background-color: var(--color-ink);
+    border: 1px solid var(--color-steel);
+    border-radius: var(--radius-DEFAULT);
+  }
+
+  .glow-hover {
+    transition: box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .glow-hover:hover {
+    box-shadow: 0 0 12px 1px color-mix(in srgb, var(--color-primary-fixed) 45%, transparent);
+    border-color: var(--color-primary-fixed);
+  }
+
+  .input-glow:focus {
+    outline: none;
+    border-color: var(--color-primary-fixed);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary-fixed) 60%, transparent);
+  }
+
+  .bioluminescent-pip {
+    box-shadow: 0 0 6px 1px currentColor;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes sf-pulse {
+  0% {
+    opacity: 0.25;
+    transform: scaleX(0.88);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0.25;
+    transform: scaleX(0.88);
+  }
+}
+
+@keyframes sf-scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  font-size: 20px;
+  line-height: 1;
+  vertical-align: middle;
+}
+.material-symbols-outlined.fill {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}

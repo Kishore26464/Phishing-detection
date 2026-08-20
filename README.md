@@ -132,6 +132,15 @@ phishing-detection/
 │   ├── pubspec.yaml            # Flutter dependencies
 │   └── android/                # Android-specific config
 │
+├── frontend_web/
+│   ├── src/
+│   │   ├── pages/              # Dashboard, scanners, history, analytics, settings…
+│   │   ├── components/         # Layout, nav, PulseCard, ThreatBadge, ResultPanel…
+│   │   ├── lib/                # api.ts, firebase.ts, firestoreScans.ts, urlFeatures.ts
+│   │   └── context/            # AuthContext (Firebase Google Sign-In)
+│   ├── package.json            # React + Vite + Tailwind v4 dependencies
+│   └── README.md               # Web app-specific docs
+│
 ├── chrome_extension/
 │   ├── manifest.json           # Extension manifest
 │   ├── background.js           # Service worker
@@ -251,6 +260,7 @@ See [API_DOCS.md](API_DOCS.md) for complete documentation with examples.
 | Component | Status | URL |
 |-----------|--------|-----|
 | Backend API | ✅ Live | [Render URL] |
+| Web App | ✅ Live (GitHub Pages) | https://kishore26464.github.io/Phishing-detection/ |
 | Flutter APK | ✅ Testable | Android 8.0+ |
 | Chrome Extension | ✅ Ready | Load unpacked from repo |
 | Firebase | ✅ Connected | Real-time Firestore |
