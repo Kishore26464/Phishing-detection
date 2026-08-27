@@ -35,18 +35,30 @@ class FirebaseService:
             return
 
         try:
-            # Try to initialize Firebase with service account key
+            # ── Priority 1: inline JSON string (Hugging Face Spaces / cloud envs) ──
+            # Set secret FIREBASE_CREDENTIALS_JSON to the full contents of the
+            # service-account JSON file. This avoids having to upload the file.
+            cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
+
+            # ── Priority 2: local file path (development) ──────────────────────────
             cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH")
-            
-            if cred_path and os.path.exists(cred_path):
-                logger.info(f"🔑 Loading Firebase credentials from {cred_path}")
+
+            if cred_json:
+                import json as _json
+                logger.info("🔑 Loading Firebase credentials from FIREBASE_CREDENTIALS_JSON env var")
+                cred_dict = _json.loads(cred_json)
+                cred = credentials.Certificate(cred_dict)
+                firebase_admin.initialize_app(cred)
+            elif cred_path and os.path.exists(cred_path):
+                logger.info(f"🔑 Loading Firebase credentials from file: {cred_path}")
                 cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred)
             else:
                 logger.warning(
-                    "⚠️  FIREBASE_CREDENTIALS_PATH not set or file not found. "
-                    "Firebase will not be initialized. "
-                    "Set FIREBASE_CREDENTIALS_PATH environment variable with path to google-services.json"
+                    "⚠️  Firebase credentials not found. Firebase will not be initialized.\n"
+                    "  • For Hugging Face Spaces: add a Secret named FIREBASE_CREDENTIALS_JSON "
+                    "containing the full service-account JSON.\n"
+                    "  • For local dev: set FIREBASE_CREDENTIALS_PATH to the JSON file path."
                 )
                 self.db = None
                 return
@@ -61,6 +73,7 @@ class FirebaseService:
         except Exception as e:
             logger.error(f"❌ Failed to initialize Firebase: {e}")
             self.db = None
+
 
     def is_initialized(self) -> bool:
         """Check if Firebase is properly initialized."""
