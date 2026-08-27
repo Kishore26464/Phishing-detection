@@ -157,27 +157,40 @@ async def scan_url(request: URLScanRequest):
         scan_time_ms=round(elapsed_ms, 2),
     )
 
-    # Save to Firestore if user_id provided
+    # Save to Firestore if user_id provided.
+    # We write BOTH camelCase (read by the web) and snake_case (read by Flutter)
+    # so that scans appear in history on every platform.
     if request.user_id:
+        vt_data = {
+            "malicious_votes": vt_raw.get("malicious_votes", 0),
+            "suspicious_votes": vt_raw.get("suspicious_votes", 0),
+            "total_engines": vt_raw.get("total_engines", 0),
+            "categories": vt_raw.get("categories", []),
+        } if vt_raw.get("available") else None
+        ml_data = {
+            "prediction": ml_result["prediction"],
+            "confidence": ml_result["confidence"],
+        }
         scan_data = {
+            # ── camelCase fields (web / firestoreScans.ts) ──
             "type": "url",
             "input": request.url,
             "threatLevel": combined["threat_level"].value,
             "confidence": combined["combined_confidence"],
             "isPhishing": ml_result["is_phishing"],
             "reasons": reasons,
-            "mlResult": {
-                "prediction": ml_result["prediction"],
-                "confidence": ml_result["confidence"],
-            },
-            "virusTotalResult": {
-                "malicious_votes": vt_raw.get("malicious_votes", 0),
-                "suspicious_votes": vt_raw.get("suspicious_votes", 0),
-                "total_engines": vt_raw.get("total_engines", 0),
-                "categories": vt_raw.get("categories", []),
-            } if vt_raw.get("available") else None,
+            "mlResult": ml_data,
+            "virusTotalResult": vt_data,
             "safeBrowsingFlagged": bool(sb_raw.get("flagged", False)),
             "scanTimeMs": round(elapsed_ms, 2),
+            # ── snake_case aliases (Flutter / ThreatHistoryItem.fromFirestore) ──
+            "scan_type": "url",
+            "threat_level": combined["threat_level"].value,
+            "is_phishing": ml_result["is_phishing"],
+            "ml_result": ml_data,
+            "virustotal": vt_data,
+            "safe_browsing_flagged": bool(sb_raw.get("flagged", False)),
+            "scan_time_ms": round(elapsed_ms, 2),
         }
         firebase_service.save_scan_result(request.user_id, scan_data)
 
@@ -227,9 +240,11 @@ async def scan_sms(request: SMSScanRequest):
         scan_time_ms=round(elapsed_ms, 2),
     )
 
-    # Save to Firestore if user_id provided
+    # Save to Firestore if user_id provided.
+    # Write both camelCase (web) and snake_case (Flutter) field names.
     if request.user_id:
         scan_data = {
+            # ── camelCase fields (web) ──
             "type": "sms",
             "input": request.message,
             "threatLevel": threat_level.value,
@@ -238,6 +253,12 @@ async def scan_sms(request: SMSScanRequest):
             "reasons": result["reasons"],
             "triggeredKeywords": result["triggered_keywords"],
             "scanTimeMs": round(elapsed_ms, 2),
+            # ── snake_case aliases (Flutter) ──
+            "scan_type": "sms",
+            "threat_level": threat_level.value,
+            "is_phishing": result["is_phishing"],
+            "triggered_keywords": result["triggered_keywords"],
+            "scan_time_ms": round(elapsed_ms, 2),
         }
         firebase_service.save_scan_result(request.user_id, scan_data)
 
@@ -285,12 +306,47 @@ async def scan_qr(request: QRScanRequest):
         scan_time_ms=round(elapsed_ms, 2),
     )
 
-    # Update Firestore record type from "url" to "qr" if user_id was provided
-    if request.user_id and firebase_service.is_initialized():
+    # Save a QR-specific Firestore record.
+    # NOTE: scan_url() already saved a record with type="url" above (because it
+    # received user_id via url_request). We save an additional QR record here so
+    # the history correctly reflects the QR scan type. Both camelCase (web) and
+    # snake_case (Flutter) field names are written for cross-platform visibility.
+    if request.user_id:
         try:
-            # The URL scan already saved as "url", we could log this or update it
-            logger.info(f"✅ QR scan result saved to Firestore for user {request.user_id}")
+            vt_raw_qr = url_scan_result.virustotal
+            vt_data_qr = {
+                "malicious_votes": vt_raw_qr.malicious_votes,
+                "suspicious_votes": vt_raw_qr.suspicious_votes,
+                "total_engines": vt_raw_qr.total_engines,
+                "categories": vt_raw_qr.categories,
+            } if vt_raw_qr else None
+            ml_data_qr = {
+                "prediction": url_scan_result.ml_result.prediction,
+                "confidence": url_scan_result.ml_result.confidence,
+            } if url_scan_result.ml_result else None
+            qr_scan_data = {
+                # ── camelCase fields (web) ──
+                "type": "qr",
+                "input": request.decoded_url,
+                "threatLevel": url_scan_result.threat_level.value,
+                "confidence": url_scan_result.confidence,
+                "isPhishing": url_scan_result.is_phishing,
+                "reasons": qr_reasons,
+                "mlResult": ml_data_qr,
+                "virusTotalResult": vt_data_qr,
+                "safeBrowsingFlagged": url_scan_result.safe_browsing_flagged,
+                "scanTimeMs": round(elapsed_ms, 2),
+                # ── snake_case aliases (Flutter) ──
+                "scan_type": "qr",
+                "threat_level": url_scan_result.threat_level.value,
+                "is_phishing": url_scan_result.is_phishing,
+                "ml_result": ml_data_qr,
+                "virustotal": vt_data_qr,
+                "safe_browsing_flagged": url_scan_result.safe_browsing_flagged,
+                "scan_time_ms": round(elapsed_ms, 2),
+            }
+            firebase_service.save_scan_result(request.user_id, qr_scan_data)
         except Exception as e:
-            logger.error(f"Failed to update QR scan in Firestore: {e}")
+            logger.error(f"Failed to save QR scan to Firestore: {e}")
 
     return response

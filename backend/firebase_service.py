@@ -96,11 +96,16 @@ class FirebaseService:
             return False
 
         try:
-            # Add timestamp
+            # Write both timestamp variants so every platform can find and sort records:
+            #   - `timestamp`  — ordered by the web (firestoreScans.ts query)
+            #   - `scannedAt`  — camelCase alias kept for legacy compatibility
+            #   - `scanned_at` — ordered by Flutter (getScanHistory query)
+            now = datetime.utcnow()
             scan_data_with_time = {
                 **scan_data,
-                "timestamp": datetime.utcnow(),
-                "scannedAt": datetime.utcnow(),
+                "timestamp": now,
+                "scannedAt": now,
+                "scanned_at": now,
             }
 
             # Save to users/{uid}/scans/{docId}

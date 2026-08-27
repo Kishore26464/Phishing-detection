@@ -35,17 +35,33 @@ class ThreatHistoryItem {
   }
 
   factory ThreatHistoryItem.fromFirestore(Map<String, dynamic> data, String docId) {
+    // Read both camelCase (written by web backend) and snake_case (written by
+    // the Flutter app itself) field names so scans from any platform are visible.
+    final rawTimestamp = data['scanned_at'] ?? data['timestamp'] ?? data['scannedAt'];
+    DateTime scannedAt;
+    if (rawTimestamp == null) {
+      scannedAt = DateTime.now();
+    } else if (rawTimestamp is DateTime) {
+      scannedAt = rawTimestamp;
+    } else {
+      // Firestore Timestamp object — has a .toDate() method
+      try {
+        scannedAt = (rawTimestamp as dynamic).toDate() as DateTime;
+      } catch (_) {
+        scannedAt = DateTime.tryParse(rawTimestamp.toString()) ?? DateTime.now();
+      }
+    }
+
     return ThreatHistoryItem(
       id: docId,
+      // snake_case (mobile writes) OR camelCase (backend writes)
       input: data['input'] ?? '',
-      scanType: data['scan_type'] ?? 'url',
-      threatLevel: data['threat_level'] ?? 'safe',
-      confidence: (data['confidence'] ?? 0.0).toDouble(),
-      isPhishing: data['is_phishing'] ?? false,
+      scanType: data['scan_type'] ?? data['type'] ?? 'url',
+      threatLevel: data['threat_level'] ?? data['threatLevel'] ?? 'safe',
+      confidence: ((data['confidence'] ?? 0.0) as num).toDouble(),
+      isPhishing: data['is_phishing'] ?? data['isPhishing'] ?? false,
       reasons: List<String>.from(data['reasons'] ?? []),
-      scannedAt: data['scanned_at'] != null
-          ? (data['scanned_at'] as dynamic).toDate()
-          : DateTime.now(),
+      scannedAt: scannedAt,
     );
   }
 

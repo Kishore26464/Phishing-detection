@@ -137,7 +137,12 @@ class FirebaseService {
           .collection('scans')
           .add({
             ...result.toJson(),
+            // Write both timestamp field names so every platform can query/sort:
+            //   - `scanned_at`  — ordered by Flutter's getScanHistory()
+            //   - `timestamp`   — ordered by the web's firestoreScans.ts query
             'scanned_at': FieldValue.serverTimestamp(),
+            'timestamp': FieldValue.serverTimestamp(),
+            'scannedAt': FieldValue.serverTimestamp(),
           });
       debugPrint('✓ Scan result saved to Firestore');
     } catch (e) {
@@ -193,7 +198,9 @@ class FirebaseService {
 
       int safe = 0, suspicious = 0, dangerous = 0;
       for (final doc in snap.docs) {
-        switch (doc['threat_level'] as String?) {
+        // Read both snake_case (mobile writes) and camelCase (backend writes)
+        final level = (doc.data()['threat_level'] ?? doc.data()['threatLevel']) as String?;
+        switch (level) {
           case 'safe':       safe++;       break;
           case 'suspicious': suspicious++; break;
           case 'dangerous':  dangerous++;  break;
